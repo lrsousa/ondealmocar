@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Onde vamos almoçar?</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+</head>
+<body>
+    <div class="container">
+    	
+        <div class="jumbotron" align="center" style="margin-top: 50px;">
+            <h1>Onde vamos almoçar?</h1>
+        </div>
+        <hr />
+		
+		<div class="row">
+	    	<div class="col-md-6" id="donutchart" style="width: 550px; height: 420px;"></div>
+	
+	        <div class="col-md-6" style="margin-top: 70px;">
+				<form action="votar" method="post">
+					
+					<div class="alert alert-danger" th:if="${(param.jaVotou != null) and (param.jaVotou[0] == 'true')}">
+						Você pode votar apenas uma vez por dia.
+					</div>
+					
+					<div class="form-group">
+						<label for="email">Email</label>
+						<input type="email" class="form-control" id="email" name="email" placeholder="Email" />
+					</div>
+					<div class="form-group">
+						<label for="restaurante">Onde vamos?</label>
+						<select class="form-control" name="restaurante">
+							<option th:each="restaurante : ${restaurantes}" th:value="${restaurante.id}" th:text="${restaurante.nome}"></option>
+						</select>
+					</div>
+					<button type="submit" class="btn btn-success">Votar</button>
+				</form>
+	        </div>
+		</div>        
+		<hr />
+		<div class="row">
+			<p class="text-center"><a href="novoVotante">Cadastrar email</a></p>
+		</div>
+		<hr />
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load("current", {packages:["corechart"]});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+   	    var jsonArray = $.ajax({
+	              url: "/resultadoParcial",
+	              dataType: "json",
+	              async: false
+              }).responseText;
+   	    jsonArray = JSON.parse(jsonArray);
+   	 	jsonArray.splice(0,0,['Task', 'Hours per Day'])
+		console.log(jsonArray);
+    	  
+        var data = google.visualization.arrayToDataTable(jsonArray);
+		var date = new Date;
+        var options = {
+          title: 'Votação: ' + date.toLocaleDateString(),
+          sliceVisibilityThreshold: 0,
+          pieHole: 0.4,
+          width:550,
+          height:420
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+        chart.draw(data, options);
+      }
+    </script>
+
+
+</body>
+</html>
